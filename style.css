@@ -40,8 +40,17 @@ body {
     position: relative;
     margin: 20px;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+}
+
+.control > * {
+    width: 60%;
+}
+
+.control > *:not(:last-child) {
+    margin-bottom: 12px;
 }
 
 .playground {
@@ -276,8 +285,13 @@ body {
     outline: none !important;
     cursor: pointer;
     font-size: 18px;
-
 }
+
+.button:disabled {
+    filter: opacity(0.4);
+    cursor: default;
+}
+
 .button:after {
     content: "";
     position: absolute;
@@ -290,12 +304,12 @@ body {
     z-index: -1;
     box-shadow: 0 3px 5px -2px rgba(0, 0, 0, 0.2);
 }
-.button:hover {
+.button:not(:disabled):hover {
     background: -webkit-gradient(linear, left top, left bottom, from(#ffd78e), to(#ffc55b));
     background: linear-gradient(to bottom, #ffd78e, #ffc55b);
     border-color: white;
 }
-.button:hover:after {
+.button:not(:disabled):hover:after {
     background: -webkit-gradient(linear, left top, left bottom, from(#ffd78e), to(#ffc55b));
     background: linear-gradient(to bottom, #ffd78e, #ffc55b);
     box-shadow: 0 0 5px 2px white, 0 0 15px #ffe9c1, 0 3px 5px -2px rgba(0, 0, 0, 0.2);

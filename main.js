@@ -1,102 +1,101 @@
-const $btn = document.getElementById('btn-kick');
-const $btn1 = document.getElementById('btn-kick1');
-const $btn2 = document.getElementById('btn-kick2');
-const character = {
-    name: 'Pikachu',
-    defaultHP: 100,
-    damageHP: 100,
-    elHP: document.getElementById('health-character'),
-    elProgressbar: document.getElementById('progressbar-character'),
+import { Pokemon } from './pokemon.js'
+import { pokemons } from './pokemons.js'
+import { random } from './tools.js'
 
-     renderHP: function(){
-        this.renderHPLife();
-        this.renderProgressbarHP();
-    },
-    
-     renderHPLife: function(){
-        this.elHP.innerText = this.damageHP + ' / ' + this.defaultHP + ' HP';
-     
-    },
-    renderProgressbarHP: function() {
-        this.elProgressbar.style.width = this.damageHP + '%';
-    },
-     changeHP: function(count){
-        if (this.damageHP < count){
-            this.damageHP = 0;
-            alert('Бедный ' + this.name + ' проиграл бой!');
-            $btn.disabled = true;
-            $btn1.disabled = true;
-            $btn2.disabled = true;
-        }else {
-            this.damageHP -= count;
-        }
-     
-    
-        this.renderHP();
+const logsWrapper = document.querySelector('#logs')
+const control = document.querySelector('#control')
+
+let isGameFinished = false
+
+const initCounter = (limit) => {
+    const LIMIT = limit;
+    let counter = 0
+
+    return () => {
+        counter = counter + 1 >= LIMIT ? LIMIT : counter + 1
+
+        console.log(`[${counter}/${LIMIT}]`);
+
+        return counter + 1 <= LIMIT
     }
 }
 
-const enemy = {
-    name: 'Charmander',
-    defaultHP: 100,
-    damageHP: 100,
-    elHP: document.getElementById('health-enemy'),
-    elProgressbar: document.getElementById('progressbar-enemy'),
-    renderHP: function(){
-        this.renderHPLife();
-        this.renderProgressbarHP();
-    },
-    
-     renderHPLife: function(){
-        this.elHP.innerText = this.damageHP + ' / ' + this.defaultHP + ' HP';
-     
-    },
-    renderProgressbarHP: function() {
-        this.elProgressbar.style.width = this.damageHP + '%';
-    },
-     changeHP: function(count){
-        if (this.damageHP < count){
-            this.damageHP = 0;
-            alert('Бедный ' + this.name + ' проиграл бой!');
-            $btn.disabled = true;
-            $btn1.disabled = true;
-            $btn2.disabled = true;
-        }else {
-            this.damageHP -= count;
+
+const pokemon1 = pokemons[random(0, pokemons.length - 1)]
+const pokemon2 = pokemons[random(0, pokemons.length - 1)]
+
+let Player1 = new Pokemon({
+    ...pokemon1,
+    selector: 'player1',
+})
+
+let Player2 = new Pokemon({
+    ...pokemon2,
+    selector: 'player2',
+})
+
+const listenerHandler = (limits) => {
+    if (!isGameFinished) {
+        const Player1Log = Player1.changeHP(random(...limits), Player2);
+
+        if (Player1.isDead) {
+            finishGame()
+        } else {
+            const charmLog = Player2.changeHP(random(...limits), Player1);
+            logsWrapper.innerHTML = logsWrapper.innerHTML.concat(`<p>${Player1Log}</p>`, `<p>${charmLog}</p>`)
         }
-     
-    
-        this.renderHP();
+
+        if (Player2.isDead) {
+            finishGame()
+        }
     }
 }
 
-$btn.addEventListener('click', function() {
-    console.log('Kick');
-    character.changeHP(random(20));
-    enemy.changeHP(random(20));
-});
-$btn1.addEventListener('click', function() {
-    console.log('Super kick');
-    
-    character.changeHP(random(35));
-    enemy.changeHP(random(35));
-  
-});
-$btn2.addEventListener('click', function() {
-    console.log('Health');
-    character.changeHP(random(-20));
-    enemy.changeHP(random(-20));
-});
+const initPlayer1 = () => {
+    control.innerHTML = ''
 
-function init(){
-    console.log('Start Game!');
-    character.renderHP();
-    enemy.renderHP();
-  
+    Player1.attacks.forEach((item) => {
+        const btn = document.createElement('button')
+        btn.classList.add('button', 'action-button')
+        btn.innerText = item.name
+
+        const inc = initCounter(item.maxCount)
+
+        btn.addEventListener('click', () => {
+            if (inc()) {
+                listenerHandler([item.minDamage, item.maxDamage])
+            }
+        })
+
+        control.appendChild(btn)
+    })
 }
 
-function random(num){
-    return Math.ceil(Math.random() * num);
+const finishGame = () => {
+    // isGameFinished = true
+    // const buttons = document.querySelectorAll('.button.action-button')
+
+    // Array.from(buttons).forEach((button) => {
+    //     button.disabled = true;
+    // })
+
+    const pokemon1 = pokemons[random(0, pokemons.length - 1)]
+    const pokemon2 = pokemons[random(0, pokemons.length - 1)]
+
+    Player1 = new Pokemon({
+        ...pokemon1,
+        selector: 'player1',
+    })
+
+    Player2 = new Pokemon({
+        ...pokemon2,
+        selector: 'player2',
+    })
+
+    initPlayer1()
 }
 
-init();
+
+
+
+initPlayer1()
